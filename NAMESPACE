@@ -1,6 +1,5 @@
-#useDynLib(CNomplexity)
 export(chromothripsis)
-export(genomeDOubling)
+export(genomeDoubling)
 export(CNscore)
 
 importFrom('GenomicRanges','granges')
