@@ -1,0 +1,7 @@
+#useDynLib(CNomplexity)
+export(chromothripsis)
+export(genomeDOubling)
+export(CNscore)
+
+importFrom('GenomicRanges','granges')
+importFrom("parallel","mclapply","detectCores")
