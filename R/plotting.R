@@ -88,7 +88,7 @@ segPlot = function(segFile=NULL,segObj=NULL,dataDir,
 			if(!is.null(nMarkCol))
 				{
 				# coloured by number of markers
-				plotFun(seg.mean=data[index,segMeanCol],
+				segChromPlot(seg.mean=data[index,segMeanCol],
 					num.mark=data[index,nMarkCol],
 					seg.start=data[index,startCol],
 					seg.end=data[index,endCol],
@@ -100,7 +100,7 @@ segPlot = function(segFile=NULL,segObj=NULL,dataDir,
 					chrom=y)
 				} else {
 				# coloured black
-				plotFun(seg.mean=data[index,segMeanCol],
+				segChromPlot(seg.mean=data[index,segMeanCol],
 					seg.start=data[index,startCol],
 					seg.end=data[index,endCol],
 					YLIM=range(data[,segMeanCol]),
