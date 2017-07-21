@@ -438,7 +438,7 @@ genomeDoubling = function(segFile,	# segment file
 	          doParallel=doParallel,
 	          nCores=nCores)})
 	    }
-		return(res)
+		return(colMeans(res))
 		} else {
 		return(list(CN=CNcomb,vars=simVars))
 		}
