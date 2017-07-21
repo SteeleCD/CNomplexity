@@ -96,8 +96,11 @@ fishersMethod = function(Ps)
   }
 
 # run a single test
-runSingle = function(bedpe,direction1col=9,direction2col=10,chromCol1=1,posCol1=2,chromCol2=4,posCol2=5,nSims=1000,
-		seg,startCol=3,endCol=4)
+runSingle = function(bedpe,
+	direction1col=9,direction2col=10,
+	chromCol1=1,posCol1=2,
+	chromCol2=4,posCol2=5,nSims=1000,
+	seg,startCol=3,endCol=4)
 	{
 	dobedpe = nrow(bedpe)>0
 	#doseg = nrow(seg)>2
@@ -107,9 +110,11 @@ runSingle = function(bedpe,direction1col=9,direction2col=10,chromCol1=1,posCol1=
 	#	endCol=endCol)
 	if(dobedpe)
 		{
+		# check for random joins
 		P2 = randomJoins(bedpe,
 			direction1col=direction1col,
 			direction2col=direction2col)
+		# check for random selection of breakpoints
 		P3 = randomOrder(bedpe,
 			chromCol1=chromCol1,
 			posCol1=posCol1,
@@ -123,9 +128,12 @@ runSingle = function(bedpe,direction1col=9,direction2col=10,chromCol1=1,posCol1=
 	}
 
 # split into windows, then check for chromothripsis
-splitWindow = function(bedpe,seg,chrom,size=1e7,gap=1e6,chromCol=2,startCol=3,endCol=4,chromCol1=1,posCol1=2,chromCol2=4,posCol2=5,direction1col=9,direction2col=10)
+splitWindow = function(bedpe,seg,chrom,size=1e7,gap=1e6,
+	chromCol=2,startCol=3,endCol=4,chromCol1=1,posCol1=2,
+	chromCol2=4,posCol2=5,direction1col=9,direction2col=10,
+	breaksLimit=20)
 	{
-	if(nrow(bedpe)<20) return(NA) # lower limit on number of fusions
+	if(nrow(bedpe)<breaksLimit) return(NA) # lower limit on number of fusions
 	# p value for exponential distribution of breakpoints
 	P1 = breakpointsExponential(bedpe,
 			chrom=chrom,
@@ -278,7 +286,8 @@ chromothripsis = function(segFile, # combined seg file
 			sepbedpe=TRUE, # Are bedpes separate
 			bedpeHead=FALSE, # does bedpe file have header
 			segHead=TRUE, # does seg file have header
-			bedpeEnding=".brass.annot.bedpe.gz"
+			bedpeEnding=".brass.annot.bedpe.gz",
+			breaksLimit=20 #  minimum number of breakpoints on chromosomes 
 			) 
 	{
 	if(doParallel&is.null(nCores)) nCores = detectCores()
@@ -338,7 +347,8 @@ chromothripsis = function(segFile, # combined seg file
 					chromCol2=bedpeChromCol2,
 					posCol2=bedpePosCol2,
 					direction1col=direction1col,
-					direction2col=direction2col)
+					direction2col=direction2col,
+					breaksLimit=breaksLimit)
 				# just output regions that are chromothriptic
 				getRuns(chromScores,paste0(x),paste0(y),size)},mc.cores=nCores)	
 			} else {
@@ -367,7 +377,8 @@ chromothripsis = function(segFile, # combined seg file
 					chromCol2=bedpeChromCol2,
 					posCol2=bedpePosCol2,
 					direction1col=direction1col,
-					direction2col=direction2col)
+					direction2col=direction2col,
+					breaksLimit=breaksLimit)
 				# just output regions that are chromothriptic
 				getRuns(chromScores,paste0(x),paste0(y),size)},simplify=FALSE)
 			}
