@@ -324,7 +324,7 @@ swantonTest = function(allelecounts,testVal)
 genomeDoubling = function(segFile,	# segment file
                        armFile,	# cytoband file
                        nReps=1000,	# number of simulations
-                       scoreFUN=ABSOLUTEscore,	# score to get p value
+                       scoreFUN=swantonScore,	# score to get p value
                        doSim=TRUE,	# whether to simulate
                        withCNb=TRUE,	# does seg file have b CN?
                        sampleCol = 1,	# seg sample column
