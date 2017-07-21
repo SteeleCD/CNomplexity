@@ -176,9 +176,9 @@ getArmCN = function(seg,armLims,
 	}
 
 # function to get arm limits in right format
-getArmLims = function(file)
+getArmLims = function(file=NULL)
 	{
-	armLims = read.table(file,sep="\t")
+	armLims = loadCytoBand(file)
 	chrom = unique(armLims[,1])
 	armLims = sapply(chrom,FUN=function(x) 
 		sapply(c("p","q"),FUN=function(y)
@@ -196,8 +196,6 @@ getArmLims = function(file)
 # ======================================================================================
 #			SIMULATION VARIABLE FUNCTIONS
 # ======================================================================================
-
-
 
 # function to get variables for simulations
 getVars = function(CN, # CN from getArmCN()
@@ -322,7 +320,7 @@ swantonTest = function(allelecounts,testVal)
 
 # function to run full genome doubling analysis
 genomeDoubling = function(segFile,	# segment file
-                       armFile,	# cytoband file
+                       armFile=NULL,	# cytoband file
                        nReps=1000,	# number of simulations
                        scoreFUN=swantonScore,	# score to get p value
                        doSim=TRUE,	# whether to simulate

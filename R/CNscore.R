@@ -61,9 +61,9 @@ CNscore = function(dir,threshLow=0.275,
 	return(outScores)
 	}
 
-getArmInfo = function(cytoFile="/nfs/users/nfs_c/cs32/cytoBand.txt")
+getArmInfo = function(cytoFile=NULL)
 	{
-	data = read.table(cytoFile,head=FALSE)
+	data = loadCytoBand(cytoFile)
 	data[,1] = gsub("chr","",data[,1])
 	sapply(c(1:22,"X","Y"),FUN=function(x) 
 		sapply(c("p","q"),FUN=function(y)

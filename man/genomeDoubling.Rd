@@ -1,7 +1,7 @@
 \name{genomeDoubling} 
 \alias{genomeDoubling} 
 \title{CNomplexity::genomeDoubling} 
-\usage{genomeDoubling(segFile,armFile,nReps=1000,
+\usage{genomeDoubling(segFile,armFile=NULL,nReps=1000,
                        scoreFUN=ABSOLUTEscore,doSim=TRUE,
                        withCNb=TRUE,sampleCol = 1,aCol = 9,
                        bCol = 10,startCol = 4,endCol = 5,
@@ -10,7 +10,7 @@
                        nCores = NULL) }
 \arguments{
 \item{segFile}{Segment file.}
-\item{armFile}{Cytoband file.}
+\item{armFile}{Cytoband file. If \code{NULL}, default will be loaded.}
 \item{nReps=1000}{Number of simulations.}
 \item{scoreFUN=ABSOLUTEscore}{Score to get p value.}
 \item{doSim=TRUE}{Whether to simulate.}

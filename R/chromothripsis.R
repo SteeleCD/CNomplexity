@@ -1,3 +1,7 @@
+# ======================================================================================
+#				TEST FUNCTIONS
+# ======================================================================================
+
 # function to test whether a single chromosome has exponential segment lengths from seg file
 segLengthsExponential = function(seg,startCol=3,endCol=4,verbose=FALSE) 
   {
@@ -88,6 +92,10 @@ walkChrom = function()
 
   }
 
+# ======================================================================================
+#				SINGLE WRAPPER
+# ======================================================================================
+
 # combining p-values with fishers method
 fishersMethod = function(Ps)
   {
@@ -126,6 +134,11 @@ runSingle = function(bedpe,
 		return(NA)
 		}
 	}
+
+
+# ======================================================================================
+#				WINDOW WRAPPER
+# ======================================================================================
 
 # split into windows, then check for chromothripsis
 splitWindow = function(bedpe,seg,chrom,size=1e7,gap=1e6,
@@ -205,6 +218,11 @@ splitWindow = function(bedpe,seg,chrom,size=1e7,gap=1e6,
 	return(res)
 	}
 
+
+# ======================================================================================
+#				OVERALL WRAPPER
+# ======================================================================================
+
 # function to combine overlapping regions
 combineRegions = function(regions,sampleCol=1,chromCol=2,startCol=3,endCol=4)
 	{
@@ -254,14 +272,6 @@ getRuns = function(chromScores,chrom,samp,size)
 
 
 
-# read in a file
-readFile = function(file,head)
-	{
-	ending = rev(strsplit(file,split="[.]")[[1]])[1]
-	if(ending=="csv") return(read.csv(file,head=head))
-	if(ending%in%c("txt","tsv")) return(read.table(file,sep="\t",head=head))
-	return(read.table(file,sep="\t",head=head))	
-	}
 
 # function to run whole chromothripsis analysis
 chromothripsis = function(segFile, # combined seg file
