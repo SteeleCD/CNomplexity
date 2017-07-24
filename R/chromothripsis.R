@@ -144,7 +144,7 @@ runSingle = function(bedpe,
 splitWindow = function(bedpe,seg,chrom,size=1e7,gap=1e6,
 	chromCol=2,startCol=3,endCol=4,chromCol1=1,posCol1=2,
 	chromCol2=4,posCol2=5,direction1col=9,direction2col=10,
-	breaksLimit=20)
+	breaksLimit=30)
 	{
 	if(nrow(bedpe)<breaksLimit) return(NA) # lower limit on number of fusions
 	# p value for exponential distribution of breakpoints
@@ -297,7 +297,7 @@ chromothripsis = function(segFile, # combined seg file
 			bedpeHead=FALSE, # does bedpe file have header
 			segHead=TRUE, # does seg file have header
 			bedpeEnding=".brass.annot.bedpe.gz",
-			breaksLimit=20 #  minimum number of breakpoints on chromosomes 
+			breaksLimit=30 #  minimum number of breakpoints on chromosomes 
 			) 
 	{
 	if(doParallel&is.null(nCores)) nCores = detectCores()
