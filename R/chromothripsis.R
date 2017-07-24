@@ -39,7 +39,7 @@ breakpointsExponential = function(bedpe,chrom,chromCol1=1,posCol1=2,chromCol2=4,
 
 # randomness of DNA fragment joins
 # counts of +/+ -/- +/- -/+ should be random (1/4,1/4,1/4,1/4)
-randomJoins = function(bedpe,direction1col=9,direction2col=10,verbose=FALSE,pThresh=0.6)
+randomJoins = function(bedpe,direction1col=9,direction2col=10,verbose=FALSE,pThresh=0.8)
   {
   joins = paste0(bedpe[,direction1col],bedpe[,direction2col])
   counts = table(joins)
@@ -58,7 +58,7 @@ randomJoins = function(bedpe,direction1col=9,direction2col=10,verbose=FALSE,pThr
 
 # randomness of DNA fragment order
 # two sides of each breakpoint should be random draws from all breakpoint positions
-randomOrder = function(bedpe,chromCol1=1,posCol1=2,chromCol2=4,posCol2=5,nSims=1000,pThresh=0.6)
+randomOrder = function(bedpe,chromCol1=1,posCol1=2,chromCol2=4,posCol2=5,nSims=1000,pThresh=0.8)
   {
   # breakpoints
   breakpoints1 = bedpe[,c(chromCol1,posCol1)]
@@ -108,7 +108,7 @@ runSingle = function(bedpe,
 	direction1col=9,direction2col=10,
 	chromCol1=1,posCol1=2,
 	chromCol2=4,posCol2=5,nSims=1000,
-	seg,startCol=3,endCol=4,pThresh=0.6)
+	seg,startCol=3,endCol=4,pThresh=0.8)
 	{
 	dobedpe = nrow(bedpe)>0
 	#doseg = nrow(seg)>2
@@ -144,7 +144,7 @@ runSingle = function(bedpe,
 splitWindow = function(bedpe,seg,chrom,size=1e7,gap=1e6,
 	chromCol=2,startCol=3,endCol=4,chromCol1=1,posCol1=2,
 	chromCol2=4,posCol2=5,direction1col=9,direction2col=10,
-	breaksLimit=30,pThresh=0.6)
+	breaksLimit=30,pThresh=0.8)
 	{
 	if(nrow(bedpe)<breaksLimit) return(NA) # lower limit on number of fusions
 	# p value for exponential distribution of breakpoints
@@ -298,7 +298,7 @@ chromothripsis = function(segFile, # combined seg file
 			segHead=TRUE, # does seg file have header
 			bedpeEnding=".brass.annot.bedpe.gz",
 			breaksLimit=30, #  minimum number of breakpoints on chromosomes
-			pThresh=0.6 # p value threshold for tests
+			pThresh=0.8 # p value threshold for tests
 			) 
 	{
 	if(doParallel&is.null(nCores)) nCores = detectCores()

@@ -9,7 +9,7 @@
 			nCores = NULL,samplesToRun = NULL,
 			chromsToRun = NULL,sepbedpe=TRUE,
 			bedpeHead=FALSE,segHead=TRUE,bedpeEnding=".brass.annot.bedpe.gz",
-			breaksLimit=30,pThresh=0.6)}
+			breaksLimit=30,pThresh=0.8)}
 \arguments{
 \item{segFile}{Segment file.}
 \item{bedpeFile}{Directory of separate bedpe files, or filename of single bedpe file.}
@@ -27,7 +27,7 @@
 \item{segSampleCol}{Column of seg file with sample name.}
 \item{bedpeSampleCol}{Column of bedpe file with sample name.}
 \item{doParallel}{Whether to run in parallel}
-\item{nCores}{NUmber of cores if \code{doParallel=TRUE}.}
+\item{nCores}{Number of cores if \code{doParallel=TRUE}.}
 \item{samplesToRun}{Character vector with sample names to run analysis for.}
 \item{chromsToRun}{Character vector with chromosome names to run analysis for.}
 \item{sepbedpe}{Whether bedpe files are separate or concatenated.}
@@ -35,7 +35,7 @@
 \item{segHead}{Whether seg file has a header}
 \item{bedpeEnding}{File ending for separate bedpe files.}
 \item{breaksLimit}{Minimum number of breakpoints on a chromsome to consider chromothripsis. Defaults to 30.}
-\item{pThresh}{P value threshold for test of randomness (random order of breakpoints and random joins). Defaults to 0.6.}
+\item{pThresh}{P value threshold for test of randomness (random order of breakpoints and random joins). Defaults to 0.8.}
 }
 \value{
 List of samples and chromosmores, with each element being a matrix with Sample name, start positon of chromothriptic region and end position of chromothriptic region. NULL is no chromothriptic regions in the chromosome.
