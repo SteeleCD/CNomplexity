@@ -1,21 +1,32 @@
 # function to score severity of copy number changes
-CNscore = function(dir,threshLow=0.275,
+CNscore = function(segFiles,threshLow=0.275,
                       threshHigh=0.8,doRel=TRUE,
                       doCat=FALSE,doScale=FALSE,
 		      searchPattern=NULL,
 			tumTotCol=7,normTotCol=5,
-			startCol=3,endCol=4,chromCol=2)
+			startCol=3,endCol=4,chromCol=2,
+			sampleCol=1,head=TRUE)
 	{
-	outScores = NULL
-	files = list.files(dir)
-	if(!is.null(searchPattern)) files = files[grep(searchPattern,files)]
-	for(i in 1:length(files))
+	# seg info
+	if(length(segFiles)==1)
 		{
-		print(files[i])
+		seg = readFile(segFiles,head=head)
+		samples = unique(seg[,sampleCol])
+		} else {
+		samples = segFiles
+		}
+	outScores = NULL
+	# loop over samples
+	for(i in 1:length(samples))
+		{
+		print(samples[i])
 		# read seg file
-		data = read.csv(paste0(dir,"/",files[i],
-		                       "/",files[i],".ascat_ngs.summary.csv")
-		                ,head=FALSE,as.is=TRUE)
+		if(length(segFiles)>0)
+			{
+			data = seg[which(seg[,sampleCol]==samples[i]),]
+			} else {
+			data = readFile(samples[i],head=head)
+			}
 		# copy number ratios
 		ratios = data[,tumTotCol]/data[,normTotCol] # copy number ratios
 		# scores for each segment
@@ -62,10 +73,10 @@ CNscore = function(dir,threshLow=0.275,
 	# set names
 	if(doCat)
 		{
-		rownames(outScores) = files
+		rownames(outScores) = samples
 		colnames(outScores) = c("Chrom","Arm","Focal","SplitLarge")
 		} else {
-		names(outScores) = files
+		names(outScores) = samples
 		}
 	# return
 	return(outScores)
