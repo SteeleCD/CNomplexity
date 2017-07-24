@@ -2,6 +2,7 @@ export(chromothripsis)
 export(genomeDoubling)
 export(CNscore)
 export(segPlot)
+export(getCNthresh)
 
 importFrom('GenomicRanges','granges')
 importFrom("parallel","mclapply","detectCores")

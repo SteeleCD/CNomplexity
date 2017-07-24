@@ -135,3 +135,12 @@ decision = function(armLength,chromLength,bothArms)
 		}
 	}
 
+# purity/ploidy adjusted CN threshold 
+getCNthresh = function(purity=0.7,ploidy=2.89,ratio=1.27)
+	{
+	constant = 2*(1-purity)
+	num = (purity*(ploidy*ratio))+constant
+	den = (purity*ploidy)+constant
+	return(log2(num/den))
+	}
+
