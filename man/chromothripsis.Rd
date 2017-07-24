@@ -9,7 +9,7 @@
 			nCores = NULL,samplesToRun = NULL,
 			chromsToRun = NULL,sepbedpe=TRUE,
 			bedpeHead=FALSE,segHead=TRUE,bedpeEnding=".brass.annot.bedpe.gz",
-			breaksLimit=20)}
+			breaksLimit=30,pThresh=0.6)}
 \arguments{
 \item{segFile}{Segment file.}
 \item{bedpeFile}{Directory of separate bedpe files, or filename of single bedpe file.}
@@ -34,7 +34,8 @@
 \item{bedpeHead}{Whether bedpe file has a header.}
 \item{segHead}{Whether seg file has a header}
 \item{bedpeEnding}{File ending for separate bedpe files.}
-\item{breaksLimit}{Minimum number of breakpoints on a chromsome to consider chromothripsis. Defaults to 20.}
+\item{breaksLimit}{Minimum number of breakpoints on a chromsome to consider chromothripsis. Defaults to 30.}
+\item{pThresh}{P value threshold for test of randomness (random order of breakpoints and random joins). Defaults to 0.6.}
 }
 \value{
 List of samples and chromosmores, with each element being a matrix with Sample name, start positon of chromothriptic region and end position of chromothriptic region. NULL is no chromothriptic regions in the chromosome.

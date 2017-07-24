@@ -39,7 +39,7 @@ breakpointsExponential = function(bedpe,chrom,chromCol1=1,posCol1=2,chromCol2=4,
 
 # randomness of DNA fragment joins
 # counts of +/+ -/- +/- -/+ should be random (1/4,1/4,1/4,1/4)
-randomJoins = function(bedpe,direction1col=9,direction2col=10,verbose=FALSE)
+randomJoins = function(bedpe,direction1col=9,direction2col=10,verbose=FALSE,pThresh=0.6)
   {
   joins = paste0(bedpe[,direction1col],bedpe[,direction2col])
   counts = table(joins)
@@ -53,12 +53,12 @@ randomJoins = function(bedpe,direction1col=9,direction2col=10,verbose=FALSE)
   if(verbose) barplot(rbind(counts,rep(sum(counts)/4,4)),beside=TRUE,legend.text=c("Obs.","Exp."))
   # goodness of fit test to multinomial
   test = chisq.test(counts,p=rep(0.25,4)) # p>0.05 indicates that counts fit multinomial distr
-  return(test$p.value>0.6) # high p (>0.05) indicates multinomial  (suggesting chromothripsis)
+  return(test$p.value>pThresh) # high p (>0.05) indicates multinomial  (suggesting chromothripsis)
   }
 
 # randomness of DNA fragment order
 # two sides of each breakpoint should be random draws from all breakpoint positions
-randomOrder = function(bedpe,chromCol1=1,posCol1=2,chromCol2=4,posCol2=5,nSims=1000)
+randomOrder = function(bedpe,chromCol1=1,posCol1=2,chromCol2=4,posCol2=5,nSims=1000,pThresh=0.6)
   {
   # breakpoints
   breakpoints1 = bedpe[,c(chromCol1,posCol1)]
@@ -83,7 +83,7 @@ randomOrder = function(bedpe,chromCol1=1,posCol1=2,chromCol2=4,posCol2=5,nSims=1
   sims = replicate(nSims,abs(diff(sample(nrow(breakpoints),2))))
   # p value
   pVal = sum(sims>indicesScore)/nSims # p>0.05 indicates random draw (suggesting chromothripsis)
-  return(pVal>0.6) # high p (>0.05) indicates random draw (suggesting chromothripsis)
+  return(pVal>pThresh) # high p (>0.05) indicates random draw (suggesting chromothripsis)
   }
 
 # ability to walk chromosome
@@ -108,7 +108,7 @@ runSingle = function(bedpe,
 	direction1col=9,direction2col=10,
 	chromCol1=1,posCol1=2,
 	chromCol2=4,posCol2=5,nSims=1000,
-	seg,startCol=3,endCol=4)
+	seg,startCol=3,endCol=4,pThresh=0.6)
 	{
 	dobedpe = nrow(bedpe)>0
 	#doseg = nrow(seg)>2
@@ -121,14 +121,14 @@ runSingle = function(bedpe,
 		# check for random joins
 		P2 = randomJoins(bedpe,
 			direction1col=direction1col,
-			direction2col=direction2col)
+			direction2col=direction2col,pThresh=pThresh)
 		# check for random selection of breakpoints
 		P3 = randomOrder(bedpe,
 			chromCol1=chromCol1,
 			posCol1=posCol1,
 			chromCol2=chromCol2,
 			posCol2=posCol2,
-			nSims=nSims)
+			nSims=nSims,pThresh=pThresh)
 		return(c(P2,P3))
 		} else {
 		return(NA)
@@ -144,7 +144,7 @@ runSingle = function(bedpe,
 splitWindow = function(bedpe,seg,chrom,size=1e7,gap=1e6,
 	chromCol=2,startCol=3,endCol=4,chromCol1=1,posCol1=2,
 	chromCol2=4,posCol2=5,direction1col=9,direction2col=10,
-	breaksLimit=30)
+	breaksLimit=30,pThresh=0.6)
 	{
 	if(nrow(bedpe)<breaksLimit) return(NA) # lower limit on number of fusions
 	# p value for exponential distribution of breakpoints
@@ -203,7 +203,7 @@ splitWindow = function(bedpe,seg,chrom,size=1e7,gap=1e6,
 			chromCol2=chromCol2,
 			posCol2=posCol2,
 			direction1col=direction1col,
-			direction2col=direction2col)
+			direction2col=direction2col,pThresh=pThresh)
 		if(!any(is.na(P))) 
 			{
 			#return(fishersMethod(c(P1,P))) #fishers method
@@ -297,7 +297,8 @@ chromothripsis = function(segFile, # combined seg file
 			bedpeHead=FALSE, # does bedpe file have header
 			segHead=TRUE, # does seg file have header
 			bedpeEnding=".brass.annot.bedpe.gz",
-			breaksLimit=30 #  minimum number of breakpoints on chromosomes 
+			breaksLimit=30, #  minimum number of breakpoints on chromosomes
+			pThresh=0.6 # p value threshold for tests
 			) 
 	{
 	if(doParallel&is.null(nCores)) nCores = detectCores()
@@ -358,7 +359,7 @@ chromothripsis = function(segFile, # combined seg file
 					posCol2=bedpePosCol2,
 					direction1col=direction1col,
 					direction2col=direction2col,
-					breaksLimit=breaksLimit)
+					breaksLimit=breaksLimit,pThresh=pThresh)
 				# just output regions that are chromothriptic
 				getRuns(chromScores,paste0(x),paste0(y),size)},mc.cores=nCores)	
 			} else {
@@ -388,7 +389,7 @@ chromothripsis = function(segFile, # combined seg file
 					posCol2=bedpePosCol2,
 					direction1col=direction1col,
 					direction2col=direction2col,
-					breaksLimit=breaksLimit)
+					breaksLimit=breaksLimit,pThresh=pThresh)
 				# just output regions that are chromothriptic
 				getRuns(chromScores,paste0(x),paste0(y),size)},simplify=FALSE)
 			}
