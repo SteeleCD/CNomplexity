@@ -1,18 +1,23 @@
+# function to score severity of copy number changes
 CNscore = function(dir,threshLow=0.275,
                       threshHigh=0.8,doRel=TRUE,
-                      doCat=FALSE,doScale=FALSE)
+                      doCat=FALSE,doScale=FALSE,
+		      searchPattern=NULL,
+			tumTotCol=7,normTotCol=5,
+			startCol=3,endCol=4,chromCol=2)
 	{
 	outScores = NULL
 	files = list.files(dir)
-	files = files[grep("a",files)]
+	if(!is.null(searchPattern)) files = files[grep(searchPattern,files)]
 	for(i in 1:length(files))
 		{
 		print(files[i])
+		# read seg file
 		data = read.csv(paste0(dir,"/",files[i],
 		                       "/",files[i],".ascat_ngs.summary.csv")
 		                ,head=FALSE,as.is=TRUE)
 		# copy number ratios
-		ratios = data[,7]/data[,5] # copy number ratios
+		ratios = data[,tumTotCol]/data[,normTotCol] # copy number ratios
 		# scores for each segment
 		scores = vector(length=length(ratios))
 		scores[which(ratios>=threshHigh)] = 2
@@ -23,18 +28,20 @@ CNscore = function(dir,threshLow=0.275,
 		# length of segment as percentage of chms
 		relLengths = apply(data,MARGIN=1,FUN=function(x)
 			{
-			#x = as.numeric(x)
-			(as.numeric(x[4])-as.numeric(x[3]))/
-				(max(data[which(data[,2]==x[2]),4])-
-					min(data[which(data[,2]==x[2]),3]))
+			(as.numeric(x[endCol])-as.numeric(x[startCol]))/
+				(max(data[which(data[,chromCol]==x[chromCol]),endCol])-
+					min(data[which(data[,chromCol]==x[chromCol]),startCol]))
 			})
+		# get categories
 		if(doCat)
 			{
-			# get categories
+			# get chromosome arm limits
 			allArmInfo = getArmInfo()
-			categories = unlist(sapply(unique(data[,2]),
+			# get categories
+			categories = unlist(sapply(unique(data[,chromCol]),
 			   FUN=function(x) categoriseCN(allArmInfo[,x],
-			               data[which(data[,2]==x),,drop=FALSE])))
+			               data[which(data[,chromCol]==x),,drop=FALSE])))
+			# get into right format
 			chromIndex = which(categories=="Chrom")
 			focalIndex = which(categories=="Focal")
 			armIndex = which(categories=="Arm")
@@ -45,12 +52,14 @@ CNscore = function(dir,threshLow=0.275,
 				sum(abs(scores[focalIndex])),
 				sum(abs(scores[splitIndex]))))
 			} else {
+			# otherwise score*relLength
 			if(doRel) scores = scores*relLengths
 			outScores = c(outScores,sum(abs(scores)))
 			}  
 		}
 	# scale
 	if(doScale) outScores = scale(outScores)
+	# set names
 	if(doCat)
 		{
 		rownames(outScores) = files
@@ -58,9 +67,11 @@ CNscore = function(dir,threshLow=0.275,
 		} else {
 		names(outScores) = files
 		}
+	# return
 	return(outScores)
 	}
 
+# get arm level chromosome lengths
 getArmInfo = function(cytoFile=NULL)
 	{
 	data = loadCytoBand(cytoFile)
@@ -71,13 +82,14 @@ getArmInfo = function(cytoFile=NULL)
 			max(data[which(data[,1]==x&grepl(y,data[,4])),3]))))
 	}
 
-categoriseCN = function(armInfo,CNinfo)
+# categorise CN changes into focal/chromosome/arm/large split
+categoriseCN = function(armInfo,CNinfo,startCol=3,endCol=4,chromCol=2)
 	{
 	armLengths = abs(diff(armInfo))[-2]
 	chromLength = armInfo[4]-armInfo[1]
-	lengths = CNinfo[,4]-CNinfo[,3]
-	pFlag = !CNinfo[,4]<armInfo[2]
-	qFlag = !CNinfo[,3]>armInfo[3]
+	lengths = CNinfo[,endCol]-CNinfo[,startCol]
+	pFlag = !CNinfo[,endCol]<armInfo[2]
+	qFlag = !CNinfo[,startCol]>armInfo[3]
 	relArmLengths = sapply(1:length(lengths),
 	         FUN=function(x) lengths[x]/armLengths[pFlag[x]+1])
 	relChromLengths = lengths/chromLength
@@ -86,6 +98,7 @@ categoriseCN = function(armInfo,CNinfo)
 		bothArms=pFlag==qFlag)
 	}
 
+# categorise single CN segment
 decision = function(armLength,chromLength,bothArms)
 	{
 	if(armLength<0.5)
