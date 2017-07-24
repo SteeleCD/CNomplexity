@@ -108,14 +108,9 @@ runSingle = function(bedpe,
 	direction1col=9,direction2col=10,
 	chromCol1=1,posCol1=2,
 	chromCol2=4,posCol2=5,nSims=1000,
-	seg,startCol=3,endCol=4,pThresh=0.8)
+	startCol=3,endCol=4,pThresh=0.8)
 	{
 	dobedpe = nrow(bedpe)>0
-	#doseg = nrow(seg)>2
-	#if(!doseg) return(NA)
-	#P1 = segLengthsExponential(seg,
-	#	startCol=startCol,
-	#	endCol=endCol)
 	if(dobedpe)
 		{
 		# check for random joins
@@ -141,10 +136,10 @@ runSingle = function(bedpe,
 # ======================================================================================
 
 # split into windows, then check for chromothripsis
-splitWindow = function(bedpe,seg,chrom,size=3e7,gap=1e6,
+splitWindow = function(bedpe,chrom,size=3e7,gap=1e6,
 	chromCol=2,startCol=3,endCol=4,chromCol1=1,posCol1=2,
 	chromCol2=4,posCol2=5,direction1col=9,direction2col=10,
-	breaksLimit=30,pThresh=0.8)
+	breaksLimit=30,pThresh=0.8,chromStart=0,chromEnd=2e8)
 	{
 	if(nrow(bedpe)<breaksLimit) return(NA) # lower limit on number of fusions
 	# p value for exponential distribution of breakpoints
@@ -155,23 +150,13 @@ splitWindow = function(bedpe,seg,chrom,size=3e7,gap=1e6,
 			chromCol2=chromCol2,
 			posCol2=posCol2) 
 	# get windows of size
-	chrom = paste0(unique(seg[,chromCol]))
-	chromSize = range(c(bedpe[which(paste0(bedpe[,chromCol1])==chrom),posCol1],
-		bedpe[which(bedpe[,chromCol2]==chrom),posCol2],
-		seg[,startCol],
-		seg[,endCol]))
-	split = seq(from=min(chromSize),to=max(chromSize)-size,by=gap)
-	if((max(split)+size)<max(chromSize)) 
+	split = seq(from=min(chromStart),to=max(chromEnd)-size,by=gap)
+	if((max(split)+size)<max(chromEnd)) 
 		{
 		split = c(split,split[length(split)]+gap)
 		names(split)[length(split)] = split[length(split)]
 		}
 	# get Granges
-	segGrange = as(paste0("chr",
-			seg[,chromCol],":",
-			seg[,startCol],"-",
-			seg[,endCol]),
-		"GRanges")
 	bedpeGrange1 = as(paste0("chr",
 			bedpe[,chromCol1],":",
 			bedpe[,posCol1],"-",
@@ -189,13 +174,10 @@ splitWindow = function(bedpe,seg,chrom,size=3e7,gap=1e6,
 					split[i],"-",
 					split[i]+size),
 				"GRanges")
-		segIndex = findOverlaps(segGrange,checkGrange)
-		segIndex = segIndex@from
 		bedpeIndex1 = findOverlaps(bedpeGrange1,checkGrange)
 		bedpeIndex2 = findOverlaps(bedpeGrange2,checkGrange)
 		bedpeIndex = unique(bedpeIndex1@from,bedpeIndex2@from)
 		P = runSingle(bedpe=bedpe[bedpeIndex,],
-			seg=seg[segIndex,],
 			startCol=startCol,
 			endCol=endCol,
 			chromCol1=chromCol1,
@@ -274,40 +256,39 @@ getRuns = function(chromScores,chrom,samp,size)
 
 
 # function to run whole chromothripsis analysis
-chromothripsis = function(segFile, # combined seg file
-			bedpeFile=NULL, # directory of separate bedpes, or single bedpe file
+chromothripsis = function(bedpeFile=NULL, # directory of separate bedpes, or single bedpe file
 			size=3e7, # window size
 			gap=1e6, # gap between sliding windows
-			chromCol=2, # seg chrom col
-			startCol=3, # seg start col
-			endCol=4, # seg end col
 			bedpeChromCol1=1, # bedpe chrom1 col
 			bedpePosCol1=2, # bedpe pos1 col
 			direction1col=9, # orientation of first partner
 			bedpeChromCol2=4, # bedpe chrom2 col
 			bedpePosCol2=5, # bedpe pos2col
 			direction2col=10, # orientation of second partner
-			segSampleCol=1, # seg sample col
-			bedpeSampleCol=1, # seg sample col
+			bedpeSampleCol=1, # bedpe sample col
 			doParallel=FALSE, # parallel computation
 			nCores = NULL,	# number of cores
 			samplesToRun = NULL, # which samples to run
 			chromsToRun = NULL, # which chromosomes to run
 			sepbedpe=TRUE, # Are bedpes separate
 			bedpeHead=FALSE, # does bedpe file have header
-			segHead=TRUE, # does seg file have header
 			bedpeEnding=".brass.annot.bedpe.gz",
 			breaksLimit=30, #  minimum number of breakpoints on chromosomes
-			pThresh=0.8 # p value threshold for tests
+			pThresh=0.8, # p value threshold for tests
+			cytoFile=NULL
 			) 
 	{
 	if(doParallel&is.null(nCores)) nCores = detectCores()
-	# read in seg file
-	seg = readFile(segFile,segHead)
-	if(!is.null(samplesToRun)) seg = seg[which(seg[,segSampleCol]%in%samplesToRun),]
-	samples = unique(seg[,segSampleCol])
 	# read in bedpe
-	if(!sepbedpe) allbedpe = readFile(bedpeFile,bedpeHead)
+	if(!sepbedpe)
+		{
+		allbedpe = readFile(bedpeFile,bedpeHead)
+		samples = unique(allbedpe[,bedpeSampleCol])
+		} else {
+		samples = list.files(bedpeFile)
+		}
+	# get chromomsome start/ends
+	chromInfo = getChromInfo(cytoFile)
 	# run analysis per sample per chromosome
 	# loop over samples
 	Ps = sapply(samples,FUN=function(y)
@@ -316,13 +297,10 @@ chromothripsis = function(segFile, # combined seg file
 		# load bedpe for this sample
 		if(sepbedpe)
 			{
-			bedpe = readFile(paste0(bedpeFile,"/",y,bedpeEnding),bedpeHead)
+			bedpe = readFile(paste0(bedpeFile,"/",y),bedpeHead)
 			} else {
 			bedpe = allbedpe[which(paste0(allbedpe[,bedpeSampleCol])==paste0(y)),]
 			}
-		# data munging
-		sampleIndex = paste0(seg[,segSampleCol])==paste0(y)
-		subSeg = seg[which(sampleIndex),]
 		if(is.null(chromsToRun))
 			{
 			chromosomes = unique(c(paste0(bedpe[,bedpeChromCol1]),
@@ -342,13 +320,9 @@ chromothripsis = function(segFile, # combined seg file
 				index2=paste0(bedpe[,bedpeChromCol2])==paste0(x)
 				indexBedpe = which(index1|index2)
 				if(length(indexBedpe)==0) return(NULL)
-				# keep seg rows for this chms
-				indexSeg = which(paste0(subSeg[,chromCol])==paste0(x))
-				if(length(indexSeg)==0) return(NULL)
 				# check for chromothripsis
 				chromScores = splitWindow(bedpe=bedpe[indexBedpe,],
 					chrom=paste0(x),
-					seg=subSeg[indexSeg,],
 					size=size,
 					chromCol=chromCol,
 					startCol=startCol,
@@ -359,7 +333,9 @@ chromothripsis = function(segFile, # combined seg file
 					posCol2=bedpePosCol2,
 					direction1col=direction1col,
 					direction2col=direction2col,
-					breaksLimit=breaksLimit,pThresh=pThresh)
+					breaksLimit=breaksLimit,pThresh=pThresh,
+					chromStart=chromInfo[1,paste0(x)],
+					chromEnd=chromInfo[2,paste0(x)])
 				# just output regions that are chromothriptic
 				getRuns(chromScores,paste0(x),paste0(y),size)},mc.cores=nCores)	
 			} else {
@@ -372,13 +348,9 @@ chromothripsis = function(segFile, # combined seg file
 				index2=paste0(bedpe[,bedpeChromCol2])==paste0(x)
 				indexBedpe = which(index1|index2)
 				if(length(indexBedpe)==0) return(NULL)
-				# keep seg rows for this chms
-				indexSeg = which(paste0(subSeg[,chromCol])==paste0(x))
-				if(length(indexSeg)==0) return(NULL)
 				# check for chromothripsis
 				chromScores = splitWindow(bedpe=bedpe[indexBedpe,],
 					chrom=paste0(x),
-					seg=subSeg[indexSeg,],
 					size=size,
 					chromCol=chromCol,
 					startCol=startCol,
@@ -389,7 +361,9 @@ chromothripsis = function(segFile, # combined seg file
 					posCol2=bedpePosCol2,
 					direction1col=direction1col,
 					direction2col=direction2col,
-					breaksLimit=breaksLimit,pThresh=pThresh)
+					breaksLimit=breaksLimit,pThresh=pThresh,
+					chromStart=chromInfo[1,paste0(x)],
+					chromEnd=chromInfo[2,paste0(x)])
 				# just output regions that are chromothriptic
 				getRuns(chromScores,paste0(x),paste0(y),size)},simplify=FALSE)
 			}
@@ -400,3 +374,14 @@ chromothripsis = function(segFile, # combined seg file
 	return(Ps)
 	}
 
+
+
+# get chromosome lengths
+getChromInfo = function(cytoFile=NULL)
+	{
+	data = loadCytoBand(cytoFile)
+	data[,1] = gsub("chr","",data[,1])
+	sapply(c(1:22,"X","Y"),FUN=function(x) 
+		c(min(data[which(data[,1]==x),2]),
+		max(data[which(data[,1]==x),3])))
+	}
