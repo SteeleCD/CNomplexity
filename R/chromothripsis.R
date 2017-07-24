@@ -141,7 +141,7 @@ runSingle = function(bedpe,
 # ======================================================================================
 
 # split into windows, then check for chromothripsis
-splitWindow = function(bedpe,seg,chrom,size=1e7,gap=1e6,
+splitWindow = function(bedpe,seg,chrom,size=3e7,gap=1e6,
 	chromCol=2,startCol=3,endCol=4,chromCol1=1,posCol1=2,
 	chromCol2=4,posCol2=5,direction1col=9,direction2col=10,
 	breaksLimit=30,pThresh=0.8)
@@ -276,7 +276,7 @@ getRuns = function(chromScores,chrom,samp,size)
 # function to run whole chromothripsis analysis
 chromothripsis = function(segFile, # combined seg file
 			bedpeFile=NULL, # directory of separate bedpes, or single bedpe file
-			size=1e7, # window size
+			size=3e7, # window size
 			gap=1e6, # gap between sliding windows
 			chromCol=2, # seg chrom col
 			startCol=3, # seg start col

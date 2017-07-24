@@ -1,7 +1,7 @@
 \name{chromothripsis} 
 \alias{chromothripsis} 
 \title{CNomplexity::chromothripsis} 
-\usage{chromothripsis(segFile, bedpeFile=NULL, size=1e7,
+\usage{chromothripsis(segFile, bedpeFile=NULL, size=3e7,
 			gap=1e6,chromCol=2,startCol=3,endCol=4,
 			bedpeChromCol1=1,bedpePosCol1=2,direction1col=9,
 			bedpeChromCol2=4,bedpePosCol2=5,direction2col=10,
