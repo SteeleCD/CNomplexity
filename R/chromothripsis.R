@@ -424,7 +424,7 @@ chromothripsisSim = function(chromLength=1000,chrom="22",
 singleSimTest = function(chrom="22",chromLength=50818468,pLoss=0.2,poisMean=50)
 	{
 	bedpe = chromothripsisSim(chromLength,chrom,pLoss,poisMean)
-	any(CNomplexity:::splitWindow(bedpe=bedpe,
+	any(splitWindow(bedpe=bedpe,
 		chrom=chrom,
 		chromCol1=1,
 		posCol1=2,
