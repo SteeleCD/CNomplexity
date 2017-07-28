@@ -392,18 +392,21 @@ getChromInfo = function(cytoFile=NULL)
 # ======================================================================================
 
 # function to create a list of SV breakpoints from simulated chromothripsis
-chromothripsisSim = function(chromLength=1000,chrom="22")
+chromothripsisSim = function(chromLength=1000,chrom="22",
+			pLoss=0.2, # probability of losing a segment
+			poisMean=50 # poisson mean for number of breakpoints
+			)
 	{
 	# get breakpoints
-	nBreaks = rpois(1,50)
-	breakpoints = sample(chromLength,nBreaks,replace=FALSE)
+	nBreaks = rpois(1,poisMean)
+	breakpoints = sort(sample(chromLength,nBreaks,replace=FALSE))
 	# make segments	
 	segStarts = c(0,breakpoints)
 	segEnds = c(breakpoints,chromLength)
 	seg = data.frame(segStarts,segEnds,"+","-",stringsAsFactors=FALSE)
 	# lose some segments
-	loss = rbinom(nrow(seg),1,0.2)	
-	seg = seg[-which(loss==1),]
+	loss = rbinom(nrow(seg),1,pLoss)	
+	if(sum(loss)>0) seg = seg[-which(loss==1),]
 	# orientation of segments for stitching
 	orientation = rbinom(nrow(seg),1,0.5)
 	seg[which(orientation==1),1:2] = seg[which(orientation==1),2:1]
@@ -418,10 +421,10 @@ chromothripsisSim = function(chromLength=1000,chrom="22")
 	}
 
 # perform chromothripsis simulation once
-singleSimTest = function(chrom="22",chromLength=50818468)
+singleSimTest = function(chrom="22",chromLength=50818468,pLoss=0.2,poisMean=50)
 	{
-	bedpe = chromothripsisSim(chromLength)
-	any(splitWindow(bedpe=bedpe,
+	bedpe = chromothripsisSim(chromLength,chrom,pLoss,poisMean)
+	any(CNomplexity:::splitWindow(bedpe=bedpe,
 		chrom=chrom,
 		chromCol1=1,
 		posCol1=2,
@@ -434,9 +437,9 @@ singleSimTest = function(chrom="22",chromLength=50818468)
 	}
 
 # perform chromothripsis simulation multiple times
-multiSimTest = function(nSim=10,chrom="22",chromLength=50818468)
+multiSimTest = function(nSim=10,chrom="22",chromLength=50818468,pLoss=0.2,poisMean=50)
 	{
-	test = replicate(nSim,singleSimTest(chrom,chromLength))
+	test = replicate(nSim,singleSimTest(chrom,chromLength,pLoss,poisMean))
 	sum(test[which(!is.na(test)&test)])/nSim
 	}
 
