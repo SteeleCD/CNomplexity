@@ -385,3 +385,57 @@ getChromInfo = function(cytoFile=NULL)
 		c(min(data[which(data[,1]==x),2]),
 		max(data[which(data[,1]==x),3])))
 	}
+
+
+# ======================================================================================
+#				SIMULATE CHROMOTHRIPSIS
+# ======================================================================================
+
+# function to create a list of SV breakpoints from simulated chromothripsis
+chromothripsisSim = function(chromLength=1000,chrom="22")
+	{
+	# get breakpoints
+	nBreaks = rpois(1,50)
+	breakpoints = sample(chromLength,nBreaks,replace=FALSE)
+	# make segments	
+	segStarts = c(0,breakpoints)
+	segEnds = c(breakpoints,chromLength)
+	seg = data.frame(segStarts,segEnds,"+","-",stringsAsFactors=FALSE)
+	# lose some segments
+	loss = rbinom(nrow(seg),1,0.2)	
+	seg = seg[-which(loss==1),]
+	# orientation of segments for stitching
+	orientation = rbinom(nrow(seg),1,0.5)
+	seg[which(orientation==1),1:2] = seg[which(orientation==1),2:1]
+	seg[which(orientation==1),3:4] = seg[which(orientation==1),4:3]
+	# new order of segments
+	newOrder = sample(nrow(seg),replace=FALSE)
+	seg = seg[newOrder,]
+	# fusions
+	out = cbind(chrom,seg[-nrow(seg),c(2,4)],chrom,seg[-1,c(1,3)])
+	colnames(out) = c("chrom1","pos1","direction1","chrom2","pos2","direction2")
+	return(out)
+	}
+
+# perform chromothripsis simulation once
+singleSimTest = function(chrom="22",chromLength=50818468)
+	{
+	bedpe = chromothripsisSim(chromLength)
+	any(splitWindow(bedpe=bedpe,
+		chrom=chrom,
+		chromCol1=1,
+		posCol1=2,
+		chromCol2=4,
+		posCol2=5,
+		direction1col=3,
+		direction2col=6,
+		chromStart=0,
+		chromEnd=chromLength))
+	}
+
+# perform chromothripsis simulation multiple times
+multiSimTest = function(nSim=10,chrom="22",chromLength=50818468)
+	{
+	replicate(nSim,singleSimTest(chrom,chromLength))
+	}
+
