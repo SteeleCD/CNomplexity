@@ -436,6 +436,7 @@ singleSimTest = function(chrom="22",chromLength=50818468)
 # perform chromothripsis simulation multiple times
 multiSimTest = function(nSim=10,chrom="22",chromLength=50818468)
 	{
-	replicate(nSim,singleSimTest(chrom,chromLength))
+	test = replicate(nSim,singleSimTest(chrom,chromLength))
+	sum(test[which(!is.na(test)&test)])/nSim
 	}
 
