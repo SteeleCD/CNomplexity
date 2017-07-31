@@ -414,16 +414,25 @@ chromothripsisSim = function(chromLength=1000,chrom="22",
 	# new order of segments
 	newOrder = sample(nrow(seg),replace=FALSE)
 	seg = seg[newOrder,]
-	# fusions
-	out = cbind(chrom,seg[-nrow(seg),c(2,4)],chrom,seg[-1,c(1,3)])
-	colnames(out) = c("chrom1","pos1","direction1","chrom2","pos2","direction2")
-	return(out)
+	if(nrow(seg)>1)
+		{
+		# fusions
+		out = cbind(chrom,seg[-nrow(seg),c(2,4)],chrom,seg[-1,c(1,3)])
+		colnames(out) = c("chrom1","pos1","direction1","chrom2","pos2","direction2")
+		return(out)
+		} else {
+		return(NA)
+		}
 	}
 
 # perform chromothripsis simulation once
 singleSimTest = function(chrom="22",chromLength=50818468,pLoss=0.2,poisMean=50)
 	{
 	bedpe = chromothripsisSim(chromLength,chrom,pLoss,poisMean)
+	while(is.na(bedpe))
+		{
+		bedpe = chromothripsisSim(chromLength,chrom,pLoss,poisMean)
+		}
 	any(splitWindow(bedpe=bedpe,
 		chrom=chrom,
 		chromCol1=1,
