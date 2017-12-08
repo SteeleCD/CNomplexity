@@ -49,7 +49,7 @@ foldBackScore = function(chms,start,end,chromIndex,invIndex,windowGR,runChrom="7
 	}
 
 # get CN score for a single window
-singleCNscore = function(CN,minLength=8,minMatch=8,maxError=0,softDir="/home/chris/software/BFB-Zakov/mckinsel-bfb-7127b9339b2b/bin",tmpFile="~/tmp.txt")
+singleBFBCNscore = function(CN,minLength=8,minMatch=8,maxError=0,softDir="/home/chris/software/BFB-Zakov/mckinsel-bfb-7127b9339b2b/bin",tmpFile="~/tmp.txt")
 	{
 	print("singleCN")
 	if(length(CN)<minLength) return(list(d=NA,matchString=NA))
@@ -77,7 +77,7 @@ singleCNscore = function(CN,minLength=8,minMatch=8,maxError=0,softDir="/home/chr
 	}
 
 # get CN score for all windows
-CNscore = function(chrom,start,end,CN,windowGR,minLength=8,minMatch=8,maxError=0,softDir="/home/chris/software/BFB-Zakov/mckinsel-bfb-7127b9339b2b/bin",tmpFile="~/tmp.txt")
+BFBCNscore = function(chrom,start,end,CN,windowGR,minLength=8,minMatch=8,maxError=0,softDir="/home/chris/software/BFB-Zakov/mckinsel-bfb-7127b9339b2b/bin",tmpFile="~/tmp.txt")
 	{
 	print("CN")
 	if(length(chrom)<1) return(NA)
@@ -90,7 +90,7 @@ CNscore = function(chrom,start,end,CN,windowGR,minLength=8,minMatch=8,maxError=0
 		simplify=FALSE)
 	# get score
 	print("d")
-	d = sapply(indices,FUN=function(x) singleCNscore(CN[x],minLength=minLength,minMatch=minMatch,maxError=maxError,softDir=softDir,tmpFile=tmpFile))
+	d = sapply(indices,FUN=function(x) singleBFBCNscore(CN[x],minLength=minLength,minMatch=minMatch,maxError=maxError,softDir=softDir,tmpFile=tmpFile))
 	return(d["d",])
 	}
 
@@ -139,7 +139,7 @@ identifyBFBwindow = function(chrom1bedpe,chrom2bedpe,
 			runChrom=runChrom,
 			minRearr=minRearr)
 	# copy number
-	d = CNscore(chrom=chromSeg,start=startSeg,
+	d = BFBCNscore(chrom=chromSeg,start=startSeg,
 		end=endSeg,CN=CNseg,
 		windowGR=windowGR,
 		minLength=minLength,
@@ -201,7 +201,7 @@ identifyBFBsetlength = function(chrom1bedpe,chrom2bedpe,
 		# which CN segs in this window
 		index = x:(x+(Length-1))
 		# distances
-		d = singleCNscore(CN=segCN[index],
+		d = singleBFBCNscore(CN=segCN[index],
 				minLength=Length,
 				minMatch=Length,
 				maxError=maxError,
