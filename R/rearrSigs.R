@@ -114,7 +114,7 @@ bootNMF = function(data,rank=2:10)
 #		FIT METRICS TO DETERMINE N
 # ============================================================================
 # NMF fit metrics
-nmfFitMetrics = function(N,res,data,plotsil=FALSE,maxiter=1000,nstarts=20,algo="Hartigan-Wong",doMetric=TRUE,clusterMeth="kmeans",hclustInput="sigs")
+nmfFitMetrics = function(N,res,data,plotsil=FALSE,maxiter=1000,nstarts=20,algo="Hartigan-Wong",doMetric=TRUE,clusterMeth="kmeans",hclustInput="sigs",kmeansDist="cosine")
 	{
 	# get matrices
 	Ps = sapply(res,FUN=function(x) x$nmf$fit[[N]]@fit@W,simplify=FALSE)
@@ -122,29 +122,36 @@ nmfFitMetrics = function(N,res,data,plotsil=FALSE,maxiter=1000,nstarts=20,algo="
 	# combine P signatures
 	sigs = t(do.call(cbind,Ps))
 	exps = do.call(rbind,Es)
+	# get distances
+	dists = matrix(NA,ncol=nrow(sigs),nrow=nrow(sigs))
+	for(x in 1:nrow(sigs)) for(y in x:nrow(sigs))
+		{
+		dist = 1-cosine(sigs[x,],sigs[y,])
+		dists[x,y] = dist
+		dists[y,x] = dist
+		}
+	distsObj = as.dist(dists)
 	# cluster signatures into right number
 	if(clusterMeth=="kmeans")
 		{
-		clusters = kmeans(sigs,
-			centers=as.numeric(N),
-			iter.max=maxiter,
-			nstart=nstarts,
-			algorithm=algo)
-		clusters = clusters$cluster
+		if(kmeansDist=="cosine")
+			{
+			clusters = pam(distsObj,k=as.numeric(N))
+			clusters = clusters$clustering
+			} else {
+			clusters = kmeans(sigs,
+				centers=as.numeric(N),
+				iter.max=maxiter,
+				nstart=nstarts,
+				algorithm=algo)
+			clusters = clusters$cluster
+			}
 		} else {
 		if(hclustInput=="sigs")
 			{
 			clusters = hclust(dist(sigs),method="ward.D2")
 			clusters = cutree(clusters,as.numeric(N))
 			} else {
-			dists = matrix(NA,ncol=nrow(sigs),nrow=nrow(sigs))
-			for(x in 1:nrow(sigs)) for(y in x:nrow(sigs))
-				{
-				dist = 1-cosine(sigs[x,],sigs[y,])
-				dists[x,y] = dist
-				dists[y,x] = dist
-				}
-			distsObj = as.dist(dists)
 			clusters = hclust(distsObj,method="complete")
 			clusters = cutree(clusters,as.numeric(N))
 			}
@@ -166,17 +173,6 @@ nmfFitMetrics = function(N,res,data,plotsil=FALSE,maxiter=1000,nstarts=20,algo="
 		{
 		# get frobenius distance
 		frobenius = sqrt(sum((data-(centroids%*%exposures))^2))
-		# get dissimilarities
-		if(!clusterMeth=="kmeans"&!hclustInput=="sigs")
-			{
-			dists = matrix(NA,ncol=nrow(sigs),nrow=nrow(sigs))
-			for(x in 1:nrow(sigs)) for(y in x:nrow(sigs))
-				{
-				dist = 1-cosine(sigs[x,],sigs[y,])
-				dists[x,y] = dist
-				dists[y,x] = dist
-				}
-			}
 		# get silhouette metric
 		groups = unique(clusters)
 		sil = sapply(1:nrow(sigs),FUN=function(x)
