@@ -1,4 +1,4 @@
-name{nmfFitMetrics} 
+\name{nmfFitMetrics} 
 \alias{nmfFitMetrics} 
 \title{CNomplexity::nmfFitMetrics} 
 \usage{nmfFitMetrics(N,res,data,

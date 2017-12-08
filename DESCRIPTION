@@ -1,5 +1,5 @@
 Package: CNomplexity
-Title: Analysis of complex copy number and structural variants in cancer genomes.
+Title: Analysis of Complex Copy Cumber and Structural Variants in Cancer Genomes.
 Description: Includes tools for identifying putative chromothriptic regions, scoring chromosome level copy numebr changes, and identifying genome doubled samples.
 Depends: R (>= 3.1.0), GenomicRanges, parallel,gtools
 Imports: GenomicRanges, parallel,gtools

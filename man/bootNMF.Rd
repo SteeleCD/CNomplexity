@@ -1,4 +1,4 @@
-name{bootNMF} 
+\name{bootNMF} 
 \alias{bootNMF} 
 \title{CNomplexity::bootNMF} 
 \usage{bootNMF(data,rank) }

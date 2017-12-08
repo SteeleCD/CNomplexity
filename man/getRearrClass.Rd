@@ -1,7 +1,7 @@
-name{getRearrClass} 
+\name{getRearrClass} 
 \alias{getRearrClass} 
 \title{CNomplexity::getRearrClass} 
-\usage{getClustered(sample,chrom1,start1,end1,
+\usage{getRearrClass(sample,chrom1,start1,end1,
 	chrom2,start2,end2,type) }
 \arguments{
 \item{sample}{String vector. Sample for each rearrangement.}
