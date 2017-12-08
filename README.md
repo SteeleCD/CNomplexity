@@ -12,3 +12,6 @@ Implements tests for genome doubling from [Dewhurst et al. (2013)](http://cancer
 
 ## For scoring chromosome level copy number changes: CNscore()
 Implements copy number scoring from [Davoli et al. (2017)](http://science.sciencemag.org/content/355/6322/eaaf8399).
+
+## For identifying rearrangement signatures: getRearrClass(), bootNMF() and nmfFitMetrics()
+Implements identification of rearrangement signatures as described in [Nik-Zainal et al. (2016)](https://www.nature.com/articles/nature17676).
