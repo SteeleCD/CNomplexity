@@ -39,7 +39,7 @@ getClustered = function(chrom1,pos1,chrom2,pos2)
 		},simplify=FALSE))
 	if(nrow(regions)==0)
 		{
-		return(NULL)
+		return(rep("unclustered",length(chrom1)))
 		}
 	# which rearrangements are in clustered regions
 	print(paste0(regions$chrom,":",regions$start.pos,"-",regions$end.pos))
