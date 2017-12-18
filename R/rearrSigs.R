@@ -74,7 +74,8 @@ getRearrClass = function(sample,
 	chrom2,
 	start2,
 	end2,
-	type)
+	type,
+	threshold=NULL)
 	{
 	clustered = unlist(sapply(unique(sample),FUN=function(x)
 		{
@@ -82,7 +83,8 @@ getRearrClass = function(sample,
 		getClustered(chrom1=chrom1[index],
 			pos1=start1[index],
 			chrom2=chrom2[index],
-			pos2=start2[index])
+			pos2=start2[index],
+			threshold=threshold)
 		}))
 	size =  sapply(1:nrow(data), FUN=function(x) 
 		{
