@@ -1,8 +1,8 @@
 # ============================================================================
 #		REARRANGEMENT SIGNATURES SETUP
 # ============================================================================
-# function to get whether rearrangments are clustered or not
-getClustered = function(chrom1,pos1,chrom2,pos2,threshold=NULL)
+# get distances between breakpoints per chromosome
+getDists = function(chrom1,pos1,chrom2,pos2,doPCF=FALSE)
 	{
 	pos1 = as.numeric(pos1)
 	pos2 = as.numeric(pos2)
@@ -28,8 +28,20 @@ getClustered = function(chrom1,pos1,chrom2,pos2,threshold=NULL)
 		dists = diff(sort(pos))
 		# segment
 		forCN = data.frame(chrom=x,pos=sort(pos),dist=dists[order(pos)])
+		if(!doPCF) return(forCN[,3])
 		return(list(info=forCN,seg=pcf(forCN,gamma=25,kmin=10)))
 		},simplify=FALSE)
+	return(dists)
+	}
+
+
+# function to get whether rearrangments are clustered or not
+getClustered = function(chrom1,pos1,chrom2,pos2,threshold=NULL)
+	{
+	pos1 = as.numeric(pos1)
+	pos2 = as.numeric(pos2)
+	# get segments per chromosome
+	dists = getDists(chrom1,pos1,chrom2,pos2,doPCF=TRUE)
 	# threshold below which to call clustered
 	if(is.null(threshold)) threshold = 0.1*mean(unlist(sapply(dists,FUN=function(x) x$info[,3])),na.rm=TRUE)
 	# which segments are below threshold
