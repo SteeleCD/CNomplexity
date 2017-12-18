@@ -2,7 +2,7 @@
 #		REARRANGEMENT SIGNATURES SETUP
 # ============================================================================
 # function to get whether rearrangments are clustered or not
-getClustered = function(chrom1,pos1,chrom2,pos2)
+getClustered = function(chrom1,pos1,chrom2,pos2,threshold=NULL)
 	{
 	pos1 = as.numeric(pos1)
 	pos2 = as.numeric(pos2)
@@ -31,7 +31,7 @@ getClustered = function(chrom1,pos1,chrom2,pos2)
 		return(list(info=forCN,seg=pcf(forCN,gamma=25,kmin=10)))
 		},simplify=FALSE)
 	# threshold below which to call clustered
-	threshold = 0.1*mean(unlist(sapply(dists,FUN=function(x) x$info[,3])),na.rm=TRUE)
+	if(is.null(threshold)) threshold = 0.1*mean(unlist(sapply(dists,FUN=function(x) x$info[,3])),na.rm=TRUE)
 	# which segments are below threshold
 	regions = do.call(rbind,sapply(dists,FUN=function(x)
 		{
@@ -39,7 +39,7 @@ getClustered = function(chrom1,pos1,chrom2,pos2)
 		},simplify=FALSE))
 	if(nrow(regions)==0)
 		{
-		return(NULL)
+		return(rep("unclustered",length(chrom1)))
 		}
 	# which rearrangements are in clustered regions
 	print(paste0(regions$chrom,":",regions$start.pos,"-",regions$end.pos))
