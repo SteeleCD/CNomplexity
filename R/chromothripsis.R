@@ -297,7 +297,7 @@ chromothripsis = function(bedpeFile=NULL, # directory of separate bedpes, or sin
 			breaksLimit=30, #  minimum number of breakpoints on chromosomes
 			pThresh=0.8, # p value threshold for tests
 			cytoFile=NULL,
-			diag=diag
+			diag=FALSE
 			) 
 	{
 	if(doParallel&is.null(nCores)) nCores = detectCores()

@@ -3,15 +3,19 @@
 # ========================================================================
 
 # plot a single chromosome
-segChromPlot = function(seg.mean,num.mark=NULL,seg.start,seg.end,
+segChromPlot = function(seg.mean,num.mark=NULL,seg.start,seg.end,seg.extra=NULL,
 		YLIM,colours,
 		highlightStarts1,highlightEnds1,highlightCol1=rgb(1,0,0,0.5),
 		highlightStarts2,highlightEnds2,highlightCol2=rgb(0,0,1,0.1),
-		fusionPos,chrom)
+		fusionPos,chrom,offset=0.0125)
 	{
-	# wmpty plot
-	plot(NA,ylim=range(seg.mean),xlim=range(c(seg.start,seg.end)),col=colours[num.mark],xaxt="n",main=chrom)
+	# empty plot
+	plot(NA,ylim=c(0,max(seg.mean)),xlim=range(c(seg.start,seg.end)),col=colours[num.mark],xaxt="n",main=chrom)
 	abline(h=0)
+	abline(h=1,lty=2)
+	# offset if two alleles	
+	offset = offset*max(seg.mean)
+	if(!is.null(seg.extra)) seg.mean=seg.mean+offset
 	# plot CN segments
 	if(!is.null(num.mark))
 		{
@@ -21,6 +25,7 @@ segChromPlot = function(seg.mean,num.mark=NULL,seg.start,seg.end,
 		# single colour for all segments
 		sapply(1:length(seg.mean),FUN=function(x) lines(x=c(seg.start[x],seg.end[x]),y=rep(seg.mean[x],2),col=colours,lwd=3))
 		}
+	if(!is.null(seg.extra)) sapply(1:length(seg.extra),FUN=function(x) lines(x=c(seg.start[x],seg.end[x]),y=rep(seg.extra[x]-offset,2),col="green",lwd=3))
 	# higlight regions of interest
 	if(length(highlightStarts1)>0)
 		{
@@ -57,7 +62,7 @@ segChromPlot = function(seg.mean,num.mark=NULL,seg.start,seg.end,
 # plot a segment profile
 segPlot = function(segFile=NULL,segObj=NULL,dataDir,
 		outDir=NULL,fileName=NULL,
-		sampleCol=2,chromCol=1,startCol=3,endCol=4,nMarkCol=NULL,segMeanCol=6,
+		sampleCol=2,chromCol=1,startCol=3,endCol=4,nMarkCol=NULL,segMeanCol=6,segBCol=NULL,
 		highlightChroms1=NULL,highlightStarts1=NULL,highlightEnds1=NULL,
 		highlightChroms2=NULL,highlightStarts2=NULL,highlightEnds2=NULL,
 		fusionChroms=NULL,fusionPos=NULL,segColour=NULL)
@@ -107,36 +112,35 @@ segPlot = function(segFile=NULL,segObj=NULL,dataDir,
 				}
 			# which rows are this sample and this chms
 			index = which(data[,sampleCol]==x&data[,chromCol]==y)
-			# plotting
-			if(!is.null(nMarkCol))
+			# optional inputs
+			if(is.null(nMarkCol))
 				{
-				# coloured by number of markers
-				segChromPlot(seg.mean=data[index,segMeanCol],
-					num.mark=data[index,nMarkCol],
-					seg.start=data[index,startCol],
-					seg.end=data[index,endCol],
-					YLIM=range(data[,segMeanCol]),
-					colours=colours,
-					highlightStarts1=highlightStarts1[highlightIndex1],
-					highlightEnds1=highlightEnds1[highlightIndex1],
-					highlightStarts2=highlightStarts2[highlightIndex2],
-					highlightEnds2=highlightEnds2[highlightIndex2],
-					fusionPos=fusionPos[fusionIndex],
-					chrom=y)
+				nMark=NULL
 				} else {
-				# coloured black
-				segChromPlot(seg.mean=data[index,segMeanCol],
-					seg.start=data[index,startCol],
-					seg.end=data[index,endCol],
-					YLIM=range(data[,segMeanCol]),
-					colours=colours,
-					highlightStarts1=highlightStarts1[highlightIndex1],
-					highlightEnds1=highlightEnds1[highlightIndex1],
-					highlightStarts2=highlightStarts2[highlightIndex2],
-					highlightEnds2=highlightEnds2[highlightIndex2],
-					fusionPos=fusionPos[fusionIndex],
-					chrom=y)
+				nMark=data[index,nMarkCol]
 				}
+			if(is.null(segBCol))
+				{
+				segB=NULL
+				} else {
+				segB=data[index,segBCol]
+				}
+			# plotting
+			# coloured by number of markers
+			segChromPlot(seg.mean=data[index,segMeanCol],
+				num.mark=nMark,
+				seg.start=data[index,startCol],
+				seg.end=data[index,endCol],
+				seg.extra=segB,
+				YLIM=c(0,max(data[,segMeanCol])),
+				colours=colours,
+				highlightStarts1=highlightStarts1[highlightIndex1],
+				highlightEnds1=highlightEnds1[highlightIndex1],
+				highlightStarts2=highlightStarts2[highlightIndex2],
+				highlightEnds2=highlightEnds2[highlightIndex2],
+				fusionPos=fusionPos[fusionIndex],
+				chrom=y)
+
 			})
 		})
 	if(!is.null(fileName)) dev.off()
