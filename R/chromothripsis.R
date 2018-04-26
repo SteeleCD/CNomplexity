@@ -281,11 +281,11 @@ chromothripsis = function(bedpeFile=NULL, # directory of separate bedpes, or sin
 			gap=1e6, # gap between sliding windows
 			bedpeChromCol1=1, # bedpe chrom1 col
 			bedpePosCol1=2, # bedpe pos1 col
-			direction1col=9, # orientation of first partner
+			direction1col=7, # orientation of first partner
 			bedpeChromCol2=4, # bedpe chrom2 col
 			bedpePosCol2=5, # bedpe pos2col
-			direction2col=10, # orientation of second partner
-			bedpeSampleCol=1, # bedpe sample col
+			direction2col=8, # orientation of second partner
+			bedpeSampleCol=9, # bedpe sample col
 			svclassCol=NULL,
 			doParallel=FALSE, # parallel computation
 			nCores = NULL,	# number of cores
