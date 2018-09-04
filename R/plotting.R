@@ -9,8 +9,14 @@ segChromPlot = function(seg.mean,num.mark=NULL,seg.start,seg.end,seg.extra=NULL,
 		highlightStarts2,highlightEnds2,highlightCol2=rgb(0,0,1,0.1),
 		fusionPos,chrom,offset=0.0125)
 	{
+	seg.mean = as.numeric(seg.mean); SEG.MEAN<<-seg.mean
+	if(!is.null(num.mark)) num.mark = as.numeric(num.mark); NUM.MARK<<-num.mark
+	seg.start = as.numeric(seg.start); SEG.START<<-seg.start
+	seg.end = as.numeric(seg.end); SEG.END<<-seg.end
+	if(!is.null(seg.extra)) seg.extra = as.numeric(seg.extra); SEG.EXTRA<<-seg.extra
+	COLOURS<<-colours
 	# empty plot
-	plot(NA,ylim=c(0,max(seg.mean)),xlim=range(c(seg.start,seg.end)),col=colours[num.mark],xaxt="n",main=chrom)
+	plot(NA,ylim=c(0,max(seg.mean,na.rm=TRUE)),xlim=range(c(seg.start,seg.end),na.rm=TRUE),col=colours[num.mark],xaxt="n",main=chrom)
 	abline(h=0)
 	abline(h=1,lty=2)
 	# offset if two alleles	
